@@ -154,17 +154,18 @@ export 'package:charts_common/common.dart'
         TypedAccessorFn,
         UTCDateTimeFactory,
         ViewMargin,
-        VocalizationCallback;
+        VocalizationCallback,
+        RangeBandConfig;
 
 export 'src/bar_chart.dart';
 export 'src/base_chart.dart' show BaseChart, LayoutConfig;
 export 'src/behaviors/a11y/domain_a11y_explore_behavior.dart'
     show DomainA11yExploreBehavior;
+export 'src/behaviors/calculation/percent_injector.dart' show PercentInjector;
 export 'src/behaviors/chart_behavior.dart' show ChartBehavior;
+export 'src/behaviors/chart_title/chart_title.dart' show ChartTitle;
 export 'src/behaviors/domain_highlighter.dart' show DomainHighlighter;
 export 'src/behaviors/initial_selection.dart' show InitialSelection;
-export 'src/behaviors/calculation/percent_injector.dart' show PercentInjector;
-export 'src/behaviors/chart_title/chart_title.dart' show ChartTitle;
 export 'src/behaviors/legend/legend_content_builder.dart'
     show LegendContentBuilder, TabularLegendContentBuilder;
 export 'src/behaviors/legend/legend_layout.dart'
@@ -173,8 +174,8 @@ export 'src/behaviors/legend/series_legend.dart' show SeriesLegend;
 export 'src/behaviors/line_point_highlighter.dart' show LinePointHighlighter;
 export 'src/behaviors/range_annotation.dart' show RangeAnnotation;
 export 'src/behaviors/select_nearest.dart' show SelectNearest;
-export 'src/behaviors/sliding_viewport.dart' show SlidingViewport;
 export 'src/behaviors/slider/slider.dart' show Slider;
+export 'src/behaviors/sliding_viewport.dart' show SlidingViewport;
 export 'src/behaviors/zoom/initial_hint_behavior.dart' show InitialHintBehavior;
 export 'src/behaviors/zoom/pan_and_zoom_behavior.dart' show PanAndZoomBehavior;
 export 'src/behaviors/zoom/pan_behavior.dart' show PanBehavior;

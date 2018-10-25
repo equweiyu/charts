@@ -15,13 +15,14 @@
 
 import 'package:meta/meta.dart' show immutable;
 
-import '../../../common/chart_context.dart' show ChartContext;
 import '../../../../common/color.dart' show Color;
 import '../../../../common/graphics_factory.dart' show GraphicsFactory;
-import '../draw_strategy/tick_draw_strategy.dart' show TickDrawStrategy;
+import '../../../common/chart_context.dart' show ChartContext;
 import '../axis.dart' show Axis;
-import '../tick_provider.dart' show TickProvider;
+import '../draw_strategy/tick_draw_strategy.dart' show TickDrawStrategy;
+import '../scale.dart' show RangeBandConfig;
 import '../tick_formatter.dart' show TickFormatter;
+import '../tick_provider.dart' show TickProvider;
 
 @immutable
 class AxisSpec<D> {
@@ -29,12 +30,14 @@ class AxisSpec<D> {
   final RenderSpec<D> renderSpec;
   final TickProviderSpec<D> tickProviderSpec;
   final TickFormatterSpec<D> tickFormatterSpec;
+  final RangeBandConfig rangeBandConfig;
 
   AxisSpec({
     this.renderSpec,
     this.tickProviderSpec,
     this.tickFormatterSpec,
     this.showAxisLine,
+    this.rangeBandConfig,
   });
 
   configure(

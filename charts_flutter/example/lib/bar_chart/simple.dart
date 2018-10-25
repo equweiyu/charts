@@ -71,6 +71,9 @@ class SimpleBarChart extends StatelessWidget {
     return new charts.BarChart(
       seriesList,
       animate: animate,
+      domainAxis: charts.OrdinalAxisSpec(
+        rangeBandConfig: charts.RangeBandConfig.percentOfStep(0.3),
+      ),
     );
   }
 
