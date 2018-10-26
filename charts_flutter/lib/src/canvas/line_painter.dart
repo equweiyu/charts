@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import 'dart:math' show Point, Rectangle;
+import 'package:charts_flutter/src/util/monotone.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_common/common.dart' as common show Color;
 
@@ -30,16 +31,16 @@ class LinePainter {
   /// to stroke-dasharray in SVG path elements. An odd number of values in the
   /// pattern will be repeated to derive an even number of values. "1,2,3" is
   /// equivalent to "1,2,3,1,2,3."
-  void draw(
-      {Canvas canvas,
-      Paint paint,
-      List<Point> points,
-      Rectangle<num> clipBounds,
-      common.Color fill,
-      common.Color stroke,
-      bool roundEndCaps,
-      double strokeWidthPx,
-      List<int> dashPattern}) {
+  void draw({Canvas canvas,
+    Paint paint,
+    List<Point> points,
+    Rectangle<num> clipBounds,
+    common.Color fill,
+    common.Color stroke,
+    bool roundEndCaps,
+    double strokeWidthPx,
+    bool smoothLine = false,
+    List<int> dashPattern}) {
     if (points.isEmpty) {
       return;
     }
@@ -68,8 +69,9 @@ class LinePainter {
       }
       paint.strokeJoin = StrokeJoin.round;
       paint.style = PaintingStyle.stroke;
-
-      if (dashPattern == null || dashPattern.isEmpty) {
+      if (smoothLine) {
+        _drawSmoothLine(canvas, paint, points);
+      } else if (dashPattern == null || dashPattern.isEmpty) {
         if (roundEndCaps == true) {
           paint.strokeCap = StrokeCap.round;
         }
@@ -83,6 +85,60 @@ class LinePainter {
     if (clipBounds != null) {
       canvas.restore();
     }
+  }
+
+  /// Draws smooth lines between each point.
+  void _drawSmoothLine(Canvas canvas, Paint paint, List<Point> points) {
+    var targetPoints = List<Point>();
+    targetPoints.addAll(points);
+    targetPoints.add(Point(
+        points[points.length - 1].x * 2, points[points.length - 1].y * 2));
+    var x0,
+        y0,
+        x1,
+        y1,
+        t0,
+        path = Path();
+    for (int i = 0; i < targetPoints.length; i++) {
+      var t1;
+      var x = targetPoints[i].x;
+      var y = targetPoints[i].y;
+      if (x == x1 && y == y1) return;
+      switch (i) {
+        case 0:
+          path.moveTo(x, y);
+          break;
+        case 1:
+          break;
+        case 2:
+          t1 = MonotoneX.slope3(x0, y0, x1, y1, x, y);
+          MonotoneX.point(
+              path,
+              x0,
+              y0,
+              x1,
+              y1,
+              MonotoneX.slope2(x0, y0, x1, y1, t1),
+              t1);
+          break;
+        default:
+          t1 = MonotoneX.slope3(x0, y0, x1, y1, x, y);
+          MonotoneX.point(
+              path,
+              x0,
+              y0,
+              x1,
+              y1,
+              t0,
+              t1);
+      }
+      x0 = x1;
+      y0 = y1;
+      x1 = x;
+      y1 = y;
+      t0 = t1;
+    }
+    canvas.drawPath(path, paint);
   }
 
   /// Draws solid lines between each point.
@@ -100,8 +156,8 @@ class LinePainter {
   }
 
   /// Draws dashed lines lines between each point.
-  void _drawDashedLine(
-      Canvas canvas, Paint paint, List<Point> points, List<int> dashPattern) {
+  void _drawDashedLine(Canvas canvas, Paint paint, List<Point> points,
+      List<int> dashPattern) {
     final localDashPattern = new List.from(dashPattern);
 
     // If an odd number of parts are defined, repeat the pattern to get an even
@@ -146,7 +202,7 @@ class LinePainter {
 
         while (d > 0) {
           var dashSegment =
-              remainder > 0 ? remainder : getNextDashPatternSegment();
+          remainder > 0 ? remainder : getNextDashPatternSegment();
           remainder = 0;
 
           // Create a unit vector in the direction from previous to next point.

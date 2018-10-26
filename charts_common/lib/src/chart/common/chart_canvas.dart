@@ -54,6 +54,7 @@ abstract class ChartCanvas {
       Color stroke,
       bool roundEndCaps,
       double strokeWidthPx,
+      bool smoothLine = false,
       List<int> dashPattern});
 
   /// Renders a pie, with an optional hole in the center.
