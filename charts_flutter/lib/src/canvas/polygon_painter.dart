@@ -14,8 +14,10 @@
 // limitations under the License.
 
 import 'dart:math' show Point, Rectangle;
-import 'package:flutter/material.dart';
+
 import 'package:charts_common/common.dart' as common show Color;
+import 'package:charts_flutter/src/util/monotone.dart';
+import 'package:flutter/material.dart';
 
 /// Draws a simple line.
 ///
@@ -37,7 +39,9 @@ class PolygonPainter {
       Rectangle<num> clipBounds,
       common.Color fill,
       common.Color stroke,
-      double strokeWidthPx}) {
+      double strokeWidthPx,
+      bool fillGradient,
+      bool smoothLine}) {
     if (points.isEmpty) {
       return;
     }
@@ -75,22 +79,114 @@ class PolygonPainter {
       }
 
       if (fillColor != null) {
-        paint.color = fillColor;
         paint.style = PaintingStyle.fill;
+
+        if (fillGradient == true) {
+          Rect rect = Rect.fromLTWH(
+              clipBounds.left.toDouble(),
+              clipBounds.top.toDouble(),
+              clipBounds.width.toDouble(),
+              clipBounds.height.toDouble());
+          paint.shader = LinearGradient(
+            colors: [
+              Color.fromARGB(
+                60,
+                fillColor.red,
+                fillColor.green,
+                fillColor.blue,
+              ),
+              Color.fromARGB(
+                10,
+                fillColor.red,
+                fillColor.green,
+                fillColor.blue,
+              )
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ).createShader(rect);
+        } else {
+          paint.color = fillColor;
+        }
       }
 
-      final path = new Path()
-        ..moveTo(points.first.x.toDouble(), points.first.y.toDouble());
+      final path = new Path();
 
-      for (var point in points) {
-        path.lineTo(point.x.toDouble(), point.y.toDouble());
+      if (smoothLine) {
+        if (points[0].y == points[1].y && points[1].x == points[2].x) {
+          path.moveTo(points.last.x.toDouble(), points.last.y.toDouble());
+          path.lineTo(points[0].x.toDouble(), points[0].y.toDouble());
+          path.lineTo(points[1].x.toDouble(), points[1].y.toDouble());
+          path.lineTo(points[2].x.toDouble(), points[2].y.toDouble());
+          _addCurve(path, points.sublist(2));
+        } else {
+          path.moveTo(points.last.x.toDouble(), points.last.y.toDouble());
+          path.lineTo(points[0].x.toDouble(), points[0].y.toDouble());
+
+          _addCurve(path,
+              points.sublist(0, points.length ~/ 2).reversed.toList(), true);
+          path.lineTo(points[points.length ~/ 2].x,
+              points[points.length ~/ 2].y.toDouble());
+
+          _addCurve(path, points.sublist(points.length ~/ 2));
+
+          path.lineTo(points.last.x.toDouble(), points.last.y.toDouble());
+        }
+      } else {
+        path.moveTo(points.first.x.toDouble(), points.first.y.toDouble());
+        for (var point in points) {
+          path.lineTo(point.x.toDouble(), point.y.toDouble());
+        }
       }
 
       canvas.drawPath(path, paint);
+      paint.shader = null;
     }
 
     if (clipBounds != null) {
       canvas.restore();
+    }
+  }
+
+  void _addCurve(Path path, List<Point> points, [bool reversed = false]) {
+    var targetPoints = List<Point>();
+    targetPoints.addAll(points);
+    targetPoints.add(Point(
+        points[points.length - 1].x * 2, points[points.length - 1].y * 2));
+    var x0, y0, x1, y1, t0;
+    var tmp = [];
+    for (int i = 0; i < targetPoints.length; i++) {
+      var t1;
+      var x = targetPoints[i].x.toDouble();
+      var y = targetPoints[i].y.toDouble();
+      if (x == x1 && y == y1) return;
+      switch (i) {
+        case 0:
+          break;
+        case 1:
+          break;
+        case 2:
+          t1 = MonotoneX.slope3(x0, y0, x1, y1, x, y);
+          tmp.add([x0, y0, x1, y1, MonotoneX.slope2(x0, y0, x1, y1, t1), t1]);
+          break;
+        default:
+          t1 = MonotoneX.slope3(x0, y0, x1, y1, x, y);
+          tmp.add([x0, y0, x1, y1, t0, t1]);
+      }
+      x0 = x1;
+      y0 = y1;
+      x1 = x;
+      y1 = y;
+      t0 = t1;
+    }
+    if (reversed) {
+      tmp.reversed.forEach((f) {
+        MonotoneX.point(path, f[2], f[3], f[0], f[1], f[5], f[4]);
+      });
+    } else {
+      tmp.forEach((f) {
+        MonotoneX.point(path, f[0], f[1], f[2], f[3], f[4], f[5]);
+      });
     }
   }
 }

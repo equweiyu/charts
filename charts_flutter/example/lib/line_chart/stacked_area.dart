@@ -98,8 +98,8 @@ class StackedAreaLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return new charts.LineChart(seriesList,
         defaultRenderer:
-            new charts.LineRendererConfig(includeArea: true, stacked: true),
-        animate: animate);
+            new charts.LineRendererConfig(includeArea: true, stacked: true,fillGradient: true,smoothLine: true),
+        animate: false);
   }
 
   /// Create one series with sample hard coded data.

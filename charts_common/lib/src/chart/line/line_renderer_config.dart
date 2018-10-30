@@ -72,6 +72,7 @@ class LineRendererConfig<D> extends LayoutViewConfig
 
   /// Draw smooth line in Line Chart
   final bool smoothLine;
+  final bool fillGradient;
 
   LineRendererConfig(
       {this.customRendererId,
@@ -86,6 +87,7 @@ class LineRendererConfig<D> extends LayoutViewConfig
       this.areaOpacity = 0.1,
       this.roundEndCaps = false,
       this.smoothLine = false,
+      this.fillGradient = false,
       SymbolRenderer symbolRenderer})
       : this.strokeWidthPx = strokeWidthPx,
         this.symbolRenderer = symbolRenderer ?? new LineSymbolRenderer();

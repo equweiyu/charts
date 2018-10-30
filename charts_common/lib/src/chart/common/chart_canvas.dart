@@ -93,7 +93,9 @@ abstract class ChartCanvas {
       Rectangle<num> clipBounds,
       Color fill,
       Color stroke,
-      double strokeWidthPx});
+      double strokeWidthPx,
+      bool fillGradient,
+      bool smoothLine});
 
   /// Renders a simple rectangle.
   void drawRect(Rectangle<num> bounds,
